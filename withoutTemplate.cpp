@@ -204,7 +204,39 @@ BTNode* BinaryTree::Delete(BTNode *root, int element) {
 	return root;
 }
 
-BTNode* BinaryTree::deleteParent(BTNode *root, int element);
+BTNode* BinaryTree::deleteParent(BTNode *root, int element) {
+
+	BTNode *p = root, *parent;
+	while(p != 0) {
+		if(element == p->data) {
+			if(p->lchild == NULL) {
+				parent->lchild = p->rchild;
+				delete(p);
+				p = NULL;
+				break;
+			} else {
+				parent->rchild = p->lchild;
+				delete(p);
+				p = NULL;
+				break;
+			}
+		} 
+
+		else if(element < p->data) {
+			parent = p;
+			p = p->lchild;
+		}
+
+		else if(element > p->data) {
+			parent = p;
+			p = p->rchild;
+		}
+	}
+
+
+
+
+}
 	
 //int BinaryTree::min(BTNode *node) {
 	// BTNode *current = root, *parent;
@@ -272,11 +304,12 @@ int main() {
 	bt.insert(19);
 	bt.insert(67);
 	bt.insert(29);
-	bt.insert(54);
+	//bt.insert(54);
 	cout << "Breadth First Search: \n";
 	bt.breadthFirst();
 	//bt.Deletion(19);			//	Deleting a node and then displaying with depth first search  .. only deletes leaves
 	bt.Delete(bt.getRoot(), 19);
+	bt.deleteParent(bt.getRoot(), 54);
 	cout << endl << endl;
 	cout << "Depth First Search: \n";
 	bt.depthFirstSearch();
