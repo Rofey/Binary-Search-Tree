@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <cmath>
 using namespace std;
 
 class BTNode {
@@ -27,15 +28,16 @@ BTNode::BTNode(int d,  BTNode *l , BTNode *r ) {
 class BinaryTree {
 	private:
 		BTNode *root;
+		int size;
 
 	public:
 		BinaryTree(); 
 		void insert(int d);
 		void Display();
 		int min(BTNode *node);
-		int maximum();
+		int max(BTNode *node);
 		BTNode* getRoot();
-		bool isBST(BTNode *Btree);
+		bool isBST(BTNode *node);
 		virtual void visit(BTNode *node); 
 		void breadthFirst();
 		void depthFirstSearch();
@@ -45,13 +47,16 @@ class BinaryTree {
 		void preOrderCall();
 		void postOrderCall();
 		void inOrderCall();
-		int FinalHeight(BTNode *tree);
-		int FinalHeightCall() { return (FinalHeight(root)); }
 		void Deletion(int element);
+		int utilizeBothNodes(BTNode *p);
+		int getHeight(BTNode *root);
+		int maxa(int a, int b);
+
 
 		// Both of them deletes the leaf but the Delete() function is self implemented!
 		BTNode* DeleteLeaf(BTNode *root, int element);
 		BTNode* Delete(BTNode *root, int element);
+		void deleteByCopying(BTNode *&node);
 
 		BTNode* deleteParent(BTNode *root, int element);
 		~BinaryTree() {}
@@ -60,6 +65,7 @@ class BinaryTree {
 
 BinaryTree::BinaryTree() { 
 	root = 0; 
+	size = 0;
 }
 
 BTNode* BinaryTree::getRoot() {
@@ -75,6 +81,7 @@ void BinaryTree::insert(int d) {
 		else p = p->rchild;
 
 	}
+	size++;
 
 	if(root == 0) 
 		root = new BTNode(d);
@@ -156,19 +163,6 @@ void BinaryTree::depthFirstSearch() {
 	cout << endl << endl;
 }
 
-//	Problem in height calculation
-int BinaryTree::FinalHeight(BTNode *tree) {
-	static int n = 0;
-	n++;
-	if(tree == 0)
-		return n;
-	if(tree!=0 && tree->lchild == 0) { 
-		return n/2;
-	}
-
-	return (FinalHeight(tree->lchild), FinalHeight(tree->rchild));
-}
-
 void BinaryTree::Deletion(int element) {
 	DeleteLeaf(root, element);
 
@@ -188,6 +182,11 @@ BTNode* BinaryTree::DeleteLeaf(BTNode *root, int element) {
 	return root;
 }
 
+
+// root pointer is sent to this function and
+// it deletes using recursion.
+// Second implementation of the above one, used
+// Two different ways
 BTNode* BinaryTree::Delete(BTNode *root, int element) {
 	BTNode *p = root;
 	if(element == root->data) {
@@ -201,81 +200,93 @@ BTNode* BinaryTree::Delete(BTNode *root, int element) {
 	else if(element > root->data) {
 		p = Delete(p->rchild, element);
 	}
-	return root;
+	return 	root;
 }
 
-BTNode* BinaryTree::deleteParent(BTNode *root, int element) {
+	
+int BinaryTree::min(BTNode *node) {
+	BTNode *current = root, *parent;
+	while(current != 0) {
+		parent = current;
+		current = current->lchild;
+	}
+	return (parent->data);
+}
 
-	BTNode *p = root, *parent;
-	while(p != 0) {
-		if(element == p->data) {
-			if(p->lchild == NULL) {
-				parent->lchild = p->rchild;
-				delete(p);
-				p = NULL;
-				break;
-			} else {
-				parent->rchild = p->lchild;
-				delete(p);
-				p = NULL;
-				break;
-			}
-		} 
+int BinaryTree::max(BTNode *node) {
+	BTNode *current = root, *parent;
+	while(current != 0) {
+		parent = current;
+		current = current->rchild;
+	}
 
-		else if(element < p->data) {
-			parent = p;
-			p = p->lchild;
+	return (parent->data);
+}
+
+int BinaryTree::utilizeBothNodes(BTNode *p) {
+	static int count = 0;
+
+	if(p->lchild != NULL || p->rchild != NULL) {
+		count++;
+		utilizeBothNodes(p->lchild);
+		utilizeBothNodes(p->rchild);
+	}
+	return count;
+}
+
+bool BinaryTree::isBST(BTNode *node) {
+	if(node == NULL) 
+		return true;
+	if(node->lchild != NULL && node->data > max(node))
+		return false;
+	if(node->rchild != NULL && node->data < min(node))
+		return false;
+	if(!isBST(node->lchild) || !isBST(node->rchild))
+		return false;
+
+	return true;
+}
+
+int BinaryTree::maxa(int a, int b) {
+	return ((a>b)? a : b);
+}
+
+
+int BinaryTree::getHeight(BTNode *root) {
+	if(root == NULL)
+		return 0;
+
+	int lh = getHeight(root->lchild);
+	int rh = getHeight(root->rchild);
+
+	return 1 + maxa(lh, rh);
+}
+
+void BinaryTree::deleteByCopying(BTNode *&node) {
+	BTNode *tmp, *prev, *curr;
+	if(node->lchild == NULL)
+		node = node->rchild;
+	if(node->rchild == NULL)
+		node = node->lchild;
+	else {
+		tmp = node->lchild;
+		prev = node;
+		while(tmp->rchild != NULL) {
+			prev = tmp;
+			tmp = tmp->rchild;
 		}
+		node->data = tmp->data;
 
-		else if(element > p->data) {
-			parent = p;
-			p = p->rchild;
-		}
+		if(prev == node) 
+			prev->lchild = tmp->lchild;
+		else
+			prev->rchild = tmp->rchild;
+
 	}
 
 
 
-
 }
-	
-//int BinaryTree::min(BTNode *node) {
-	// BTNode *current = root, *parent;
-	// while(current != 0) {
-	// 	parent = current;
-	// 	current = current->lchild;
-	// }
-	// return (parent->data);
-//}
-
-// int BinaryTree::maximum() {
-// 	BTNode *current = root, *parent;
-// 	while(current != 0) {
-// 		parent = current;
-// 		current = current->rchild;
-// 	}
-
-// 	return (parent->data);
-// }
-
-// bool isBST(BTNode *BTree) {
-// 	BTNode *root = BTree;
-// 	if(root == 0) {
-// 		cout << "TRUE";
-// 		return true;
-// 	}
-
-// 	else if(root->data > min(root->rchild)) {
-// 		cout << "FALSE";
-// 		return false;
-// 	}
-
-// 	else if(root->data < max(root->lchild)) {
-// 		cout << "FALSE";
-// 		return false;
-// 	}
-// 	cout << "TRUE";
-// 	return true;
-// }
 
 
 
@@ -288,8 +299,6 @@ void BinaryTree::Display() {
 }	
 
 
-
-
 int main() {
 	BinaryTree bt;
 	bt.insert(50);
@@ -297,32 +306,44 @@ int main() {
 	bt.insert(72);
 	bt.insert(12);
 	bt.insert(23);
-	bt.insert(54);
+	//bt.insert(54);
 	bt.insert(76);
 	bt.insert(9);
 	bt.insert(14);
 	bt.insert(19);
 	bt.insert(67);
 	bt.insert(29);
-	//bt.insert(54);
+	
+
 	cout << "Breadth First Search: \n";
 	bt.breadthFirst();
-	//bt.Deletion(19);			//	Deleting a node and then displaying with depth first search  .. only deletes leaves
-	bt.Delete(bt.getRoot(), 19);
-	bt.deleteParent(bt.getRoot(), 54);
+	
+	//All three functions work!
+
+	//bt.Deletion(29);			//	Deleting a node and then displaying with depth first search  .. only deletes leaves
+	//bt.Delete(bt.getRoot(), 19);
+	//bt.deleteParent(bt.getRoot(), 14);
+
+	BTNode *x = &(bt.getRoot());
+	bt.deleteByCopying(x);
+
 	cout << endl << endl;
 	cout << "Depth First Search: \n";
 	bt.depthFirstSearch();
+	
 	cout << endl << endl;
 	cout << "Final Height : \t";
-	cout << bt.FinalHeight(bt.getRoot());		//	can call with bt.finalHeightCall() too;
+	cout << bt.getHeight(bt.getRoot());		//	can call with bt.finalHeightCall() too;
+	cout << endl << "Minimum: " << bt.min(bt.getRoot());
+	cout << endl << "Maximum: " << bt.max(bt.getRoot());
 
 
-	// Doesnt work for timebeing..
+	bool check = bt.isBST(bt.getRoot());
+	check ? cout << "\nIt is a BST": cout << "\nNot a BST";
 
-	//cout << bt.minimum();
-	//cout << bt.maximum();
-	//isBST(bt.getRoot());	
-	//bt.Display();
+	//cout << endl << "Parents that utilize both parents: " << bt.utilizeBothNodes(bt.getRoot());
+	//^ This function doesnt work with deletion!
 
+
+	
 }

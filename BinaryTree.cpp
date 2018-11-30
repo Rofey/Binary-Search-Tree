@@ -72,7 +72,7 @@ void BinaryTree<T> ::Display() {
 
 
 int main() {
-	BinaryTree<int> bt;
+	BinaryTree<int> ;
 	bt.insert(4);
 
 
