@@ -29,6 +29,7 @@ class BinaryTree {
 	private:
 		BTNode *root;
 		int size;
+		int check;
 
 	public:
 		BinaryTree(); 
@@ -39,6 +40,7 @@ class BinaryTree {
 		BTNode* getRoot();
 		bool isBST(BTNode *node);
 		virtual void visit(BTNode *node); 
+		int* search(BTNode *p, int el);
 		void breadthFirst();
 		void depthFirstSearch();
 		void inOrder(BTNode *p);
@@ -51,12 +53,15 @@ class BinaryTree {
 		int utilizeBothNodes(BTNode *p);
 		int getHeight(BTNode *root);
 		int maxa(int a, int b);
+		void mirrorBinaryTree(BTNode *here);
+		void mirror(BTNode *root);
+		bool checkMirror(BTNode *node1, BTNode *node2);
 
 
 		// Both of them deletes the leaf but the Delete() function is self implemented!
 		BTNode* DeleteLeaf(BTNode *root, int element);
 		BTNode* Delete(BTNode *root, int element);
-		void deleteByCopying(BTNode *&node);
+		void deleteByCopying(BTNode *	node);
 
 		BTNode* deleteParent(BTNode *root, int element);
 		~BinaryTree() {}
@@ -66,6 +71,7 @@ class BinaryTree {
 BinaryTree::BinaryTree() { 
 	root = 0; 
 	size = 0;
+	check = 0;
 }
 
 BTNode* BinaryTree::getRoot() {
@@ -93,6 +99,23 @@ void BinaryTree::insert(int d) {
 void BinaryTree::visit(BTNode *node) {
 	cout << node->data << " ";
 }
+
+int* BinaryTree::search(BTNode *root, int el) {
+	BTNode *p = root;
+	while(p != 0) {
+		if(el == p->data)
+			return &p->data;
+		else if(el < p->data)
+			p = p->lchild;
+		else 
+			p = p->rchild;
+	}
+	return 0;
+}
+
+
+
+// Same thing if implemented by stack is preorder transversal
 
 void BinaryTree::breadthFirst() {
 	BTNode *p = root;
@@ -262,7 +285,7 @@ int BinaryTree::getHeight(BTNode *root) {
 	return 1 + maxa(lh, rh);
 }
 
-void BinaryTree::deleteByCopying(BTNode *&node) {
+void BinaryTree::deleteByCopying(BTNode *node) {
 	BTNode *tmp, *prev, *curr;
 	if(node->lchild == NULL)
 		node = node->rchild;
@@ -283,11 +306,47 @@ void BinaryTree::deleteByCopying(BTNode *&node) {
 			prev->rchild = tmp->rchild;
 
 	}
+}
 
+void BinaryTree::mirrorBinaryTree(BTNode *here) {
+	if(here == NULL) {
+		return;
+	}
+	else {
 
+		// This takes us to the leaf nodes and then we start
+		// exchanges nodes.
+
+		mirrorBinaryTree(here->lchild);
+		mirrorBinaryTree(here->rchild);
+
+		//	Exchanges like we exchange 2 variables
+		BTNode *tmp;
+		tmp = here->lchild;
+		here->lchild = here->rchild;
+		here->rchild = tmp;
+	}
 
 }
 
+
+bool BinaryTree::checkMirror(BTNode *node1, BTNode *node2) {
+	if(node1 == NULL || node2 == NULL) {
+		return check;
+	}
+	else {
+		if(node1->rchild == node2->lchild) {
+			check = 1;
+		}
+		else {
+			check = 0;
+		}
+
+		checkMirror(node1->lchild, node2->rchild);
+		checkMirror(node1->rchild, node2->lchild);
+	}
+	return check;
+}
 
 
 void BinaryTree::Display() {
@@ -306,7 +365,6 @@ int main() {
 	bt.insert(72);
 	bt.insert(12);
 	bt.insert(23);
-	//bt.insert(54);
 	bt.insert(76);
 	bt.insert(9);
 	bt.insert(14);
@@ -314,20 +372,40 @@ int main() {
 	bt.insert(67);
 	bt.insert(29);
 	
-
+	//bt.mirrorBinaryTree(bt.getRoot());
 	cout << "Breadth First Search: \n";
 	bt.breadthFirst();
-	
+	bt.mirrorBinaryTree(bt.getRoot());
+
+	BinaryTree bt2;
+	bt2.insert(50);
+	bt2.insert(17);
+	bt2.insert(72);
+	bt2.insert(12);
+	bt2.insert(23);
+	bt2.insert(76);
+	//bt2.insert(9);
+	bt2.insert(14);
+	bt2.insert(19);
+	bt2.insert(67);
+	bt2.insert(29);
+
+	cout << "\n Mirror chck "<< bt.checkMirror(bt.getRoot(), bt2.getRoot());
+
+
+
 	//All three functions work!
 
 	//bt.Deletion(29);			//	Deleting a node and then displaying with depth first search  .. only deletes leaves
 	//bt.Delete(bt.getRoot(), 19);
 	//bt.deleteParent(bt.getRoot(), 14);
 
-	BTNode *x = &(bt.getRoot());
-	bt.deleteByCopying(x);
 
+	//bt.deleteByCopying(bt.getRoot());
 	cout << endl << endl;
+
+	
+
 	cout << "Depth First Search: \n";
 	bt.depthFirstSearch();
 	
@@ -337,11 +415,14 @@ int main() {
 	cout << endl << "Minimum: " << bt.min(bt.getRoot());
 	cout << endl << "Maximum: " << bt.max(bt.getRoot());
 
+//	cout << "\nSearching: ";
+//	int *x = bt.search(bt.getRoot(), 67);
+//	cout << *x;
 
 	bool check = bt.isBST(bt.getRoot());
 	check ? cout << "\nIt is a BST": cout << "\nNot a BST";
 
-	//cout << endl << "Parents that utilize both parents: " << bt.utilizeBothNodes(bt.getRoot());
+	cout << endl << "Parents that utilize both parents: " << bt.utilizeBothNodes(bt.getRoot());
 	//^ This function doesnt work with deletion!
 
 
